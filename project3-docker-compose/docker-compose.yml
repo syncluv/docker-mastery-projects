@@ -1,0 +1,36 @@
+﻿version: '3.8'
+
+services:
+  web:
+    image: nginx:latest
+    container_name: project3-web
+    ports:
+      - "8082:80"
+    volumes:
+      - ./html:/usr/share/nginx/html
+    networks:
+      - app-network
+    depends_on:
+      - db
+
+  db:
+    image: mysql:8.0
+    container_name: project3-db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: myapp
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: apppassword
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - app-network
+    ports:
+      - "3306:3306"
+
+volumes:
+  db-data:
+
+networks:
+  app-network:
+    driver: bridge

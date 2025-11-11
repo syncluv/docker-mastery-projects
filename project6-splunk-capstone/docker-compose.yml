@@ -1,0 +1,87 @@
+﻿version: '3.8'
+
+services:
+  splunk-enterprise:
+    image: splunk/splunk:latest
+    container_name: splunk-enterprise
+    environment:
+      SPLUNK_GENERAL_TERMS: --accept-sgt-current-at-splunk-com
+      SPLUNK_START_ARGS: --accept-license
+      SPLUNK_PASSWORD: ChangeMeToSomethingSecure123!
+    ports:
+      - "8000:8000"
+      - "9997:9997"
+    volumes:
+      - splunk-enterprise-data:/opt/splunk/var/lib/splunk
+      - splunk-enterprise-configs:/opt/splunk/etc
+    networks:
+      - splunk-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/en-US/account/login"]
+      interval: 60s
+      timeout: 20s
+      retries: 5
+      start_period: 180s
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '1.0'
+          memory: 1G
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+  splunk-heavy-forwarder:
+    image: splunk/splunk:latest
+    container_name: splunk-heavy-forwarder
+    environment:
+      SPLUNK_GENERAL_TERMS: --accept-sgt-current-at-splunk-com
+      SPLUNK_START_ARGS: --accept-license
+      SPLUNK_PASSWORD: ChangeMeToSomethingSecure123!
+    ports:
+      - "8001:8000"
+      - "9998:9998"
+    volumes:
+      - splunk-forwarder-data:/opt/splunk/var/lib/splunk
+      - splunk-forwarder-configs:/opt/splunk/etc
+      - ./logs:/var/log/host
+    networks:
+      - splunk-network
+    depends_on:
+      - splunk-enterprise
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/en-US/account/login"]
+      interval: 60s
+      timeout: 20s
+      retries: 5
+      start_period: 180s
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "30m"
+        max-file: "3"
+
+volumes:
+  splunk-enterprise-data:
+  splunk-enterprise-configs:
+  splunk-forwarder-data:
+  splunk-forwarder-configs:
+
+networks:
+  splunk-network:
+    driver: bridge

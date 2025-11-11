@@ -1,0 +1,30 @@
+﻿# Docker and Container files
+*.log
+.DS_Store
+/logs/*
+!.gitkeep
+node_modules/
+.env
+*.swp
+*.pyc
+__pycache__/
+.vscode/
+.idea/
+*.bak
+*.tmp
+
+# Docker-specific
+.docker/
+docker-compose.override.yml
+
+# Splunk and other application data
+/var/lib/splunk
+/opt/splunk
+
+# IDE
+*.iml
+.project
+.classpath
+
+# OS
+Thumbs.db
